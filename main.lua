@@ -29,6 +29,21 @@ function brickLine(filledBrickIndices, brickLength)
   return line
 end
 
+function replaceChar(str, pos, r)
+    res = ("%s%s%s"):format(str:sub(1,pos-1), r, str:sub(pos+1))
+    return res
+end
+
+function rpad(str, maxLen, filler)
+    if string.len(str) <= maxLen then
+      return str
+    end
+
+    lenDiff = maxLen - string.len(str)
+
+    return str .. string.rep(filler, lenDiff)
+end
+
 function printWorld(world, opts)
   lines = {}
   for _, indexRow in ipairs(world.brickIndexRows) do
@@ -36,11 +51,16 @@ function printWorld(world, opts)
   end
 
   for _ = 1, opts.clearance do
-    table.insert(lines, '')
+    table.insert(lines, opts.clearanceChar)
   end
 
-
   table.insert(lines, paddleLine{ pos=world.paddlePos, char=opts.paddleChar, length=opts.paddleLength })
+
+  lines[world.ballPos.y] = rpad(
+    replaceChar(lines[world.ballPos.y], world.ballPos.x, opts.ballChar),
+    world.ballPos.x,
+    opts.clearanceChar
+  )
 
   for _, line in ipairs(lines) do
     print(line)
@@ -57,20 +77,17 @@ function main()
         {1, 2,     },
         {1, 2, 3, 4},
       },
-      ballPos={ x=3, y=5 },
+      ballPos={ x=2, y=5 },
     },
     {
       paddleLength=6,
       paddleChar="=",
       brickLength=6,
       clearance=3,
+      ballChar='o',
+      clearanceChar=' ',
     }
   )
-
-  -- print(brickLine({1, 2, 3, 4}, 4))
-  -- print(brickLine({   2,    4}, 4))
-  -- print(brickLine({1, 2,     }, 4))
-  -- print(brickLine({1, 2, 3, 4}, 4))
 
 end
 
