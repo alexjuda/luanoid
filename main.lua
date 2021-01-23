@@ -1,8 +1,11 @@
+function paddleLine(opts)
+  return string.rep(" ", opts.pos) .. string.rep(opts.char, opts.length)
+end
+
 function printWorld(world, opts)
   print("paddle pos: " .. world.paddlePos)
 
-  line = string.rep(" ", world.paddlePos) .. string.rep(opts.paddleChar, opts.paddleLength)
-  print(line)
+  print(paddleLine{ pos=world.paddlePos, char=opts.paddleChar, length=opts.paddleLength })
 end
 
 function main()
