@@ -9,7 +9,7 @@ function brickFill(length)
 end
 
 function brickPlaceholder(length)
-  return string.rep(".", length)
+  return string.rep(" ", length)
 end
 
 function brickLine(filledBrickIndices, brickLength)
@@ -30,26 +30,39 @@ function brickLine(filledBrickIndices, brickLength)
 end
 
 function printWorld(world, opts)
-  print("paddle pos: " .. world.paddlePos)
+  -- print("paddle pos: " .. world.paddlePos)
+  for _, indexRow in ipairs(world.brickIndexRows) do
+    print(brickLine(indexRow, opts.brickLength))
+  end
+
+  print()
 
   print(paddleLine{ pos=world.paddlePos, char=opts.paddleChar, length=opts.paddleLength })
 end
 
 function main()
-  -- printWorld(
-  --   {
-  --     paddlePos=12
-  --   },
-  --   {
-  --     paddleLength=6,
-  --     paddleChar="="
-  --   }
-  -- )
+  printWorld(
+    {
+      paddlePos=12,
+      brickIndexRows={
+        {1, 2, 3, 4},
+        {   2,    4},
+        {1, 2,     },
+        {1, 2, 3, 4},
+      }
+    },
+    {
+      paddleLength=6,
+      paddleChar="=",
+      brickLength=6
+    }
+  )
 
-  print(brickLine({1, 2, 3, 4}, 4))
-  print(brickLine({   2,    4}, 4))
-  print(brickLine({1, 2,     }, 4))
-  print(brickLine({1, 2, 3, 4}, 4))
+  -- print(brickLine({1, 2, 3, 4}, 4))
+  -- print(brickLine({   2,    4}, 4))
+  -- print(brickLine({1, 2,     }, 4))
+  -- print(brickLine({1, 2, 3, 4}, 4))
+
 end
 
 main()
