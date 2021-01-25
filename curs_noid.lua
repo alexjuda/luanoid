@@ -1,5 +1,27 @@
 local curses = require "curses"
 
+local function current_date_time()
+  return os.date("!%Y-%m-%dT%TZ")
+end
+
+debug_file = nil
+
+local function log(msg, details)
+  if debug_file == nil then
+    debug_file = io.open("debug.log", "a")
+    debug_file:write('\n=== new session ===\n')
+  end
+
+  log_text = "[" .. current_date_time() .. "] " .. msg .. "\n"
+
+  for key, val in pairs(details) do
+    log_text = log_text .. '"' .. key .. '" = ' .. val .. "\n"
+  end
+
+  debug_file:write(log_text .. "\n")
+  debug_file:flush()
+end
+
 -- curses wrappers
 
 local function make_screen()
@@ -159,6 +181,7 @@ local function main()
     move_cursor(game_win, 0, 0)
 
     input_char = read_char(game_win)
+    log("read char", { input_char=input_char })
   end
 
   cleanup_screen()
