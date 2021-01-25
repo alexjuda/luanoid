@@ -230,6 +230,14 @@ local function run()
       world.paddle_left_x = world.paddle_left_x + 1
     end
 
+    -- ball collisions
+    if luanoid.is_pos_adjacent_to_rect(
+      snap_pos(world.ball_pos_frac),
+      { x=1, y=1, width=world_opts.board_size.width, height=world_opts.board_size.height }
+    ) then
+      world.ball_velocity = { x=world.ball_velocity.x * -1, y=world.ball_velocity.y * -1 }
+    end
+
     -- ball movement
     world.ball_pos_frac = advance_pos(world.ball_pos_frac, world.ball_velocity, render_interval)
 
@@ -243,7 +251,6 @@ local function run()
 
     move_cursor(game_win, 0, 0)
 
-    log("sleeping...")
     sleep(1000 * render_interval)
     input_char = read_char(game_win)
     log("read char", { input_char=input_char })
