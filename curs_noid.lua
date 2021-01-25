@@ -31,32 +31,32 @@ end
 
 -- game rendering
 
-function paddleLine(opts)
+local function paddle_line(opts)
   return string.rep(" ", opts.pos) .. string.rep(opts.char, opts.length)
 end
 
-function brickFill(length)
+local function brick_fill(length)
   assert(2 <= length, "brick too short: " .. length)
 
   return "[" .. string.rep("=", length - 2) .. "]"
 end
 
-function brickPlaceholder(length)
+local function brick_placeholder(length)
   return string.rep(" ", length)
 end
 
-function brickLine(filledBrickIndices, brickLength)
-  line = ""
-  prevBrickI = 0
+local function brick_line(filled_brick_indices, brick_length)
+  local line = ""
+  local prev_brick_i = 0
 
-  for _, brickI in ipairs(filledBrickIndices) do
-    for fillI = prevBrickI, brickI - 2 do
-      line = line .. brickPlaceholder(brickLength)
+  for _, brick_i in ipairs(filled_brick_indices) do
+    for fill_i = prev_brick_i, brick_i - 2 do
+      line = line .. brick_placeholder(brick_length)
     end
 
-    line = line .. brickFill(brickLength)
+    line = line .. brick_fill(brick_length)
 
-    prevBrickI = brickI
+    prev_brick_i = brick_i
   end
 
   return line
@@ -67,7 +67,7 @@ local function main()
   local screen = make_screen()
 
   print_text(screen, 5, 20, "hello!")
-  print_text(screen, 2, 1, brickLine({ 1, 2, 4 }, 4))
+  print_text(screen, 2, 1, brick_line({ 1, 2, 4 }, 4))
   render(screen)
 
   move_cursor(screen, 0, 0)
