@@ -32,8 +32,8 @@ end
 
 -- game rendering
 
-local function paddle_line(opts)
-  return string.rep(" ", opts.pos) .. string.rep(opts.char, opts.length)
+local function paddle(char, length)
+  return string.rep(char, length)
 end
 
 local function brick_fill(length)
@@ -47,6 +47,7 @@ local function brick_placeholder(length)
 end
 
 local function render_world(scr, world, opts)
+  -- bricks
   for row_i, brick_row in ipairs(world.filled_brick_index_rows) do
     for _, filled_brick_index in ipairs(brick_row) do
       local brick_len = opts.brick_len
@@ -59,19 +60,26 @@ local function render_world(scr, world, opts)
     end
   end
 
+  -- ball
   print_text(
     scr,
     world.ball_pos.y - 1,
     world.ball_pos.x - 1,
     opts.ball_char
   )
+
+  -- paddle
+  print_text(
+    scr,
+    opts.board_size.height - 2,
+    world.paddle_left_x - 1,
+    paddle(opts.paddle_char, opts.paddle_len)
+  )
 end
 
 local function main()
   local screen = make_screen()
 
-  -- print_text(screen, 5, 20, "hello!")
-  -- print_text(screen, 2, 1, brick_line({ 1, 2, 4 }, 4))
   render_world(
     screen,
     {
@@ -81,10 +89,14 @@ local function main()
         {1, 2, 3, 4},
       },
       ball_pos={ x=5, y=4 },
+      paddle_left_x=3,
     },
     {
       brick_len=4,
       ball_char="o",
+      paddle_len=6,
+      paddle_char="=",
+      board_size={ height=12 }
     }
   )
   redraw(screen)
