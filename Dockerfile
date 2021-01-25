@@ -53,7 +53,11 @@ RUN sudo apt-get install -y \
     liblua5.3-dev \
     luarocks
 
+RUN echo "\n# customized\n" >> ~/.bashrc
+
 RUN sudo apt-get install -y libncurses5-dev \
     && luarocks install lcurses --local
+
+RUN echo "# make lua see rocks\neval \"\$(luarocks path)\"" >> ~/.bashrc
 
 WORKDIR /app
