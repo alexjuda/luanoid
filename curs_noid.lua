@@ -22,22 +22,8 @@ local function log(msg, details)
   debug_file:flush()
 end
 
--- curses wrappers
 
-local function make_screen()
-  local screen = curses.initscr()
-  -- TODO: add screen configuration
-  screen:clear()
-  return screen
-end
-
-local function make_window(scr, height, width, y0, x0)
-  return curses.newwin(height, width, y0, x0)
-end
-
-local function cleanup_screen()
-  curses.endwin()
-end
+-- translations
 
 local function trans_coords(y, x, src2dst_trans)
   local trans = src2dst_trans or { dy=0, dx=0 }
@@ -48,10 +34,37 @@ local function inv_trans_coords(y, x, src2dst)
   return y - src2dst.dy, x - src2dst.dx
 end
 
+local function combine_trans(trans1, trans2)
+  local trans1_ = trans1 or { dy=0, dx=0 }
+  local trans2_ = trans2 or { dy=0, dx=0 }
+  return { dy=trans1_.dy + trans2_.dy, dx=trans1_.dx + trans2_.dx }
+end
+
+
+-- curses wrappers
+
+local function make_screen()
+  local screen = curses.initscr()
+  -- TODO: add screen configuration
+  screen:clear()
+  return screen
+end
+
+lua2curses_trans = { dy=-1, dx=-1 }
+
+local function make_window(scr, height, width, y0, x0)
+  local y_t, x_t = trans_coords(y0, x0, lua2curses_trans)
+  log('make_window', { height=height, width=width, y_t=y_t, x_t=x_t })
+  return curses.newwin(height, width, y_t, x_t)
+end
+
+local function cleanup_screen()
+  curses.endwin()
+end
+
 local function print_text(screen, y, x, text, trans)
-  local trans_y, trans_x = trans_coords(y, x, trans)
-  screen:mvaddstr(trans_y, trans_x, text)
-  -- print("x = " .. x .. ", y = " .. y .. ", text = '" .. text .. "'\n")
+  local y_t, x_t = trans_coords(y, x, combine_trans(trans, lua2curses_trans))
+  screen:mvaddstr(y_t, x_t, text)
 end
 
 local function redraw(screen)
@@ -68,9 +81,10 @@ local function read_char(screen)
 end
 
 local function move_cursor(screen, y, x, trans)
-  local trans_y, trans_x = trans_coords(y, x, trans)
-  screen:move(trans_y, trans_x)
+  local y_t, x_t = trans_coords(y, x, combine_trans(trans, lua2curses_trans))
+  screen:move(y_t, x_t)
 end
+
 
 -- game rendering
 
@@ -95,8 +109,8 @@ local function render_world(scr, world, opts, trans)
       local brick_len = opts.brick_len
       print_text(
         scr,
-        row_i - 1,
-        (filled_brick_index - 1) * brick_len,
+        row_i,
+        (filled_brick_index - 1) * brick_len + 1,
         brick_fill(brick_len),
         trans
       )
@@ -106,9 +120,10 @@ local function render_world(scr, world, opts, trans)
   -- ball
   print_text(
     scr,
-    world.ball_pos.y - 1,
-    world.ball_pos.x - 1,
-    opts.ball_char
+    world.ball_pos.y,
+    world.ball_pos.x,
+    opts.ball_char,
+    trans
   )
 
 
@@ -153,8 +168,8 @@ local function main()
     screen,
     world_opts.board_size.height,
     world_opts.board_size.width,
-    0,
-    0
+    1,
+    1
   )
   -- window -> window content transformation caused by 1-width window borders
   local win_border_trans = { dy=1, dx=1 }
@@ -186,6 +201,7 @@ local function main()
 
   cleanup_screen()
 end
+
 
 -- To display Lua errors, we must close curses to return to
 -- normal terminal mode, and then write the error to stdout.
