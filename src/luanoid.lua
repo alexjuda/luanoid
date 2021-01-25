@@ -113,8 +113,17 @@ end
 
 -- collisions
 
-local function is_pos_adjacent_to_rect(pos, rect)
+function luanoid.is_pos_adjacent_to_rect(pos, rect)
+  rect_p2 = { x=rect.x + rect.width, y=rect.y + rect.height }
 
+  diff_x1 = rect.x - pos.x
+  diff_y1 = rect.y - pos.y
+  diff_x2 = rect_p2.x - pos.x
+  diff_y2 = rect_p2.y - pos.y
+
+  log('is_pos', { diff_x1=diff_x1, diff_y1=diff_y1, diff_x2=diff_x2, diff_y2=diff_y2})
+
+  return math.min(math.abs(diff_x1), math.abs(diff_x2)) + math.min(math.abs(diff_y1), math.abs(diff_y2)) < 2
 end
 
 -- render blocks
