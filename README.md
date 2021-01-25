@@ -13,3 +13,7 @@ Inside docker container:
 ```
 $ lua5.3 main.lua
 ```
+
+## Misc
+
+- [Styleguide](https://github.com/luarocks/lua-style-guide)
