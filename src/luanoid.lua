@@ -1,6 +1,7 @@
 local curses = require "curses"
 local sleep = require "sleep"
 
+local luanoid = {}
 
 local function current_date_time()
   return os.date("!%Y-%m-%dT%TZ")
@@ -192,7 +193,7 @@ local function make_world_opts()
   }
 end
 
-local function main()
+local function run()
   local screen = make_screen()
 
   local world = starter_world()
@@ -254,4 +255,8 @@ local function err (err)
   os.exit (2)
 end
 
-xpcall (main, err)
+function luanoid.main()
+  xpcall (run, err)
+end
+
+return luanoid
