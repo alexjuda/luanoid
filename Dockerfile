@@ -55,8 +55,9 @@ RUN sudo apt-get install -y \
 
 RUN echo "\n# customized\n" >> ~/.bashrc
 
-RUN sudo apt-get install -y libncurses5-dev \
-    && luarocks install lcurses --local
+RUN sudo apt-get install -y libncurses5-dev
+RUN luarocks install lcurses --local \
+    && luarocks install sleep --local
 
 RUN echo "# make lua see rocks\neval \"\$(luarocks path)\"" >> ~/.bashrc
 
