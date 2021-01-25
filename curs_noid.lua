@@ -1,4 +1,6 @@
 local curses = require "curses"
+local sleep = require "sleep"
+
 
 local function current_date_time()
   return os.date("!%Y-%m-%dT%TZ")
@@ -14,7 +16,7 @@ local function log(msg, details)
 
   log_text = "[" .. current_date_time() .. "] " .. msg .. "\n"
 
-  for key, val in pairs(details) do
+  for key, val in pairs(details or {}) do
     log_text = log_text .. '"' .. key .. '" = ' .. val .. "\n"
   end
 
@@ -88,6 +90,25 @@ end
 
 -- game rendering
 
+local render_interval = 0.5 -- [s]
+
+local function time_since_start(frame_i)
+  return render_interval * frame_i
+end
+
+local function snap_pos(pos)
+  return { x=math.floor(pos.x), y=math.floor(pos.y) }
+end
+
+local function advance_pos(pos, velocity, time_delta)
+  local x_new = pos.x + velocity.x * time_delta
+  local y_new = pos.y + velocity.y * time_delta
+  return { x=x_new, y=y_new }
+end
+
+
+-- render blocks
+
 local function paddle(char, length)
   return string.rep(char, length)
 end
@@ -101,6 +122,7 @@ end
 local function brick_placeholder(length)
   return string.rep(" ", length)
 end
+
 
 local function render_world(scr, world, opts, trans)
   -- bricks
@@ -118,10 +140,11 @@ local function render_world(scr, world, opts, trans)
   end
 
   -- ball
+  local ball_pos = snap_pos(world.ball_pos_frac)
   print_text(
     scr,
-    world.ball_pos.y,
-    world.ball_pos.x,
+    ball_pos.y,
+    ball_pos.x,
     opts.ball_char,
     trans
   )
@@ -144,7 +167,8 @@ local function starter_world()
       {1,    3,  },
       {1, 2, 3, 4},
     },
-    ball_pos={ x=5, y=4 },
+    ball_pos_frac={ x=5.0, y=4.0 },
+    ball_velocity={ x=1, y=1 },
     paddle_left_x=3,
   }
 end
@@ -175,15 +199,20 @@ local function main()
   local win_border_trans = { dy=1, dx=1 }
 
   local input_char = nil
+  local frame_i = 0
   while input_char ~= 'q' do
     clear(game_win)
     game_win:border()
 
+    -- paddle movement
     if input_char == 'a' then
       world.paddle_left_x = world.paddle_left_x - 1
     elseif input_char == 'd' then
       world.paddle_left_x = world.paddle_left_x + 1
     end
+
+    -- ball movement
+    world.ball_pos_frac = advance_pos(world.ball_pos_frac, world.ball_velocity, render_interval)
 
     render_world(
         game_win,
@@ -195,8 +224,12 @@ local function main()
 
     move_cursor(game_win, 0, 0)
 
+    log("sleeping...")
+    sleep(1000 * render_interval)
     input_char = read_char(game_win)
     log("read char", { input_char=input_char })
+
+    frame_i = frame_i + 1
   end
 
   cleanup_screen()
