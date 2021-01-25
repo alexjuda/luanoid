@@ -12,4 +12,13 @@ TestIsPosAdjacent = {}
     )
   end
 
+  function TestIsPosAdjacent:test_bottom_center()
+    luaunit.assertTrue(
+        luanoid.is_pos_adjacent_to_rect(
+        { x=10, y=10 },
+        { x=1, y=1, width=20, height=10 }
+        )
+    )
+  end
+
 os.exit(luaunit.LuaUnit.run())

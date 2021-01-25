@@ -123,7 +123,7 @@ function luanoid.is_pos_adjacent_to_rect(pos, rect)
 
   log('is_pos', { diff_x1=diff_x1, diff_y1=diff_y1, diff_x2=diff_x2, diff_y2=diff_y2})
 
-  return math.min(math.abs(diff_x1), math.abs(diff_x2)) + math.min(math.abs(diff_y1), math.abs(diff_y2)) < 2
+  return math.min(math.abs(diff_x1), math.abs(diff_x2)) <= 1 or math.min(math.abs(diff_y1), math.abs(diff_y2)) <= 1
 end
 
 -- render blocks
