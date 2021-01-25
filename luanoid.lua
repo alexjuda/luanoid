@@ -110,6 +110,12 @@ local function advance_pos(pos, velocity, time_delta)
 end
 
 
+-- collisions
+
+local function is_pos_adjacent_to_rect(pos, rect)
+
+end
+
 -- render blocks
 
 local function paddle(char, length)
