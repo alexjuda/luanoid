@@ -23,7 +23,7 @@ local function redraw(screen)
 end
 
 local function read_char(screen)
-  return screen:getch()
+  return string.char(screen:getch())
 end
 
 local function move_cursor(screen, y, x)
@@ -77,34 +77,53 @@ local function render_world(scr, world, opts)
   )
 end
 
+local function starter_world()
+  return {
+    filled_brick_index_rows={
+      {1, 2, 3, 4},
+      {1,    3,  },
+      {1, 2, 3, 4},
+    },
+    ball_pos={ x=5, y=4 },
+    paddle_left_x=3,
+  }
+end
+
+local function make_world_opts()
+  return {
+    brick_len=4,
+    ball_char="o",
+    paddle_len=6,
+    paddle_char="=",
+    board_size={ height=12 }
+  }
+end
+
 local function main()
   local screen = make_screen()
 
-  render_world(
-    screen,
-    {
-      filled_brick_index_rows={
-        {1, 2, 3, 4},
-        {1,    3,  },
-        {1, 2, 3, 4},
-      },
-      ball_pos={ x=5, y=4 },
-      paddle_left_x=3,
-    },
-    {
-      brick_len=4,
-      ball_char="o",
-      paddle_len=6,
-      paddle_char="=",
-      board_size={ height=12 }
-    }
-  )
-  redraw(screen)
+  local world = starter_world()
+  local world_opts = make_world_opts()
 
-  move_cursor(screen, 0, 0)
-  read_char(screen)
+  -- input_char = read_char(screen)
+  -- print("read: " .. input_char)
+
+  local input_char = nil
+  while input_char ~= 'q' do
+    render_world(
+        screen,
+        world,
+        world_opts
+    )
+    redraw(screen)
+
+    move_cursor(screen, 0, 0)
+
+    input_char = read_char(screen)
+  end
 
   cleanup_screen()
+  -- print("read: " .. string.char(input_char))
 end
 
 -- To display Lua errors, we must close curses to return to
