@@ -19,7 +19,12 @@ local function print_text(screen, y, x, text)
 end
 
 local function redraw(screen)
+  -- screen:clearok()
   screen:refresh()
+end
+
+local function clear(screen)
+  screen:erase()
 end
 
 local function read_char(screen)
@@ -105,11 +110,16 @@ local function main()
   local world = starter_world()
   local world_opts = make_world_opts()
 
-  -- input_char = read_char(screen)
-  -- print("read: " .. input_char)
-
   local input_char = nil
   while input_char ~= 'q' do
+    clear(screen)
+
+    if input_char == 'a' then
+      world.paddle_left_x = world.paddle_left_x - 1
+    elseif input_char == 'd' then
+      world.paddle_left_x = world.paddle_left_x + 1
+    end
+
     render_world(
         screen,
         world,
@@ -123,7 +133,6 @@ local function main()
   end
 
   cleanup_screen()
-  -- print("read: " .. string.char(input_char))
 end
 
 -- To display Lua errors, we must close curses to return to
