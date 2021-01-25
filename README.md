@@ -2,10 +2,14 @@
 
 ## Running
 
+Dev setup:
 ```
-$ brew install lua@5.3
-$ brew install luarocks
-$ brew install ncurses
-$ luarocks --lua-dir=/usr/local/opt/lua@5.3 install lcurses NCURSES_INCDIR=/usr/local/opt/ncurses/include
-$ lua main.lua
+$ docker build --target luanoid-dev -t luanoid-dev .
+$ docker run -it --rm --mount type=bind,source="$(pwd)",target="/app/" luanoid-dev:latest /bin/bash
+```
+
+
+Inside docker container:
+```
+$ lua5.3 main.lua
 ```
