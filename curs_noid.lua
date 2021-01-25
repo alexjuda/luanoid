@@ -9,12 +9,26 @@ local function make_screen()
   return screen
 end
 
+local function make_window(scr, height, width, y0, x0)
+  return curses.newwin(height, width, y0, x0)
+end
+
 local function cleanup_screen()
   curses.endwin()
 end
 
-local function print_text(screen, y, x, text)
-  screen:mvaddstr(y, x, text)
+local function trans_coords(y, x, src2dst_trans)
+  local trans = src2dst_trans or { dy=0, dx=0 }
+  return y + trans.dy, x + trans.dx
+end
+
+local function inv_trans_coords(y, x, src2dst)
+  return y - src2dst.dy, x - src2dst.dx
+end
+
+local function print_text(screen, y, x, text, trans)
+  local trans_y, trans_x = trans_coords(y, x, trans)
+  screen:mvaddstr(trans_y, trans_x, text)
   -- print("x = " .. x .. ", y = " .. y .. ", text = '" .. text .. "'\n")
 end
 
@@ -31,8 +45,9 @@ local function read_char(screen)
   return string.char(screen:getch())
 end
 
-local function move_cursor(screen, y, x)
-  screen:move(y, x)
+local function move_cursor(screen, y, x, trans)
+  local trans_y, trans_x = trans_coords(y, x, trans)
+  screen:move(trans_y, trans_x)
 end
 
 -- game rendering
@@ -51,7 +66,7 @@ local function brick_placeholder(length)
   return string.rep(" ", length)
 end
 
-local function render_world(scr, world, opts)
+local function render_world(scr, world, opts, trans)
   -- bricks
   for row_i, brick_row in ipairs(world.filled_brick_index_rows) do
     for _, filled_brick_index in ipairs(brick_row) do
@@ -60,7 +75,8 @@ local function render_world(scr, world, opts)
         scr,
         row_i - 1,
         (filled_brick_index - 1) * brick_len,
-        brick_fill(brick_len)
+        brick_fill(brick_len),
+        trans
       )
     end
   end
@@ -73,7 +89,9 @@ local function render_world(scr, world, opts)
     opts.ball_char
   )
 
+
   -- paddle
+  paddle_y, paddle_x = trans_coords(opts.board_size.height - 1, world.paddle_left_x)
   print_text(
     scr,
     opts.board_size.height - 2,
@@ -100,7 +118,7 @@ local function make_world_opts()
     ball_char="o",
     paddle_len=6,
     paddle_char="=",
-    board_size={ height=12 }
+    board_size={ height=12, width=20 }
   }
 end
 
@@ -109,10 +127,20 @@ local function main()
 
   local world = starter_world()
   local world_opts = make_world_opts()
+  local game_win = make_window(
+    screen,
+    world_opts.board_size.height,
+    world_opts.board_size.width,
+    0,
+    0
+  )
+  -- window -> window content transformation caused by 1-width window borders
+  local win_border_trans = { dy=1, dx=1 }
 
   local input_char = nil
   while input_char ~= 'q' do
-    clear(screen)
+    clear(game_win)
+    game_win:border()
 
     if input_char == 'a' then
       world.paddle_left_x = world.paddle_left_x - 1
@@ -121,15 +149,16 @@ local function main()
     end
 
     render_world(
-        screen,
+        game_win,
         world,
-        world_opts
+        world_opts,
+        win_border_trans
     )
-    redraw(screen)
+    redraw(game_win)
 
-    move_cursor(screen, 0, 0)
+    move_cursor(game_win, 0, 0)
 
-    input_char = read_char(screen)
+    input_char = read_char(game_win)
   end
 
   cleanup_screen()
