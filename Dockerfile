@@ -50,6 +50,10 @@ FROM utils-base as luanoid-dev
 
 RUN sudo apt-get install -y \
     lua5.3 \
+    liblua5.3-dev \
     luarocks
+
+RUN sudo apt-get install -y libncurses5-dev \
+    && luarocks install lcurses --local
 
 WORKDIR /app
