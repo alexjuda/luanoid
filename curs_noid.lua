@@ -15,9 +15,10 @@ end
 
 local function print_text(screen, y, x, text)
   screen:mvaddstr(y, x, text)
+  -- print("x = " .. x .. ", y = " .. y .. ", text = '" .. text .. "'\n")
 end
 
-local function render(screen)
+local function redraw(screen)
   screen:refresh()
 end
 
@@ -45,30 +46,48 @@ local function brick_placeholder(length)
   return string.rep(" ", length)
 end
 
-local function brick_line(filled_brick_indices, brick_length)
-  local line = ""
-  local prev_brick_i = 0
-
-  for _, brick_i in ipairs(filled_brick_indices) do
-    for fill_i = prev_brick_i, brick_i - 2 do
-      line = line .. brick_placeholder(brick_length)
+local function render_world(scr, world, opts)
+  for row_i, brick_row in ipairs(world.filled_brick_index_rows) do
+    for _, filled_brick_index in ipairs(brick_row) do
+      local brick_len = opts.brick_len
+      print_text(
+        scr,
+        row_i - 1,
+        (filled_brick_index - 1) * brick_len,
+        brick_fill(brick_len)
+      )
     end
-
-    line = line .. brick_fill(brick_length)
-
-    prev_brick_i = brick_i
   end
 
-  return line
+  print_text(
+    scr,
+    world.ball_pos.y - 1,
+    world.ball_pos.x - 1,
+    opts.ball_char
+  )
 end
-
 
 local function main()
   local screen = make_screen()
 
-  print_text(screen, 5, 20, "hello!")
-  print_text(screen, 2, 1, brick_line({ 1, 2, 4 }, 4))
-  render(screen)
+  -- print_text(screen, 5, 20, "hello!")
+  -- print_text(screen, 2, 1, brick_line({ 1, 2, 4 }, 4))
+  render_world(
+    screen,
+    {
+      filled_brick_index_rows={
+        {1, 2, 3, 4},
+        {1,    3,  },
+        {1, 2, 3, 4},
+      },
+      ball_pos={ x=5, y=4 },
+    },
+    {
+      brick_len=4,
+      ball_char="o",
+    }
+  )
+  redraw(screen)
 
   move_cursor(screen, 0, 0)
   read_char(screen)
