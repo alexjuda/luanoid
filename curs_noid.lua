@@ -47,7 +47,6 @@ end
 
 local function make_screen()
   local screen = curses.initscr()
-  -- TODO: add screen configuration
   screen:clear()
   return screen
 end
@@ -56,8 +55,12 @@ lua2curses_trans = { dy=-1, dx=-1 }
 
 local function make_window(scr, height, width, y0, x0)
   local y_t, x_t = trans_coords(y0, x0, lua2curses_trans)
+
   log('make_window', { height=height, width=width, y_t=y_t, x_t=x_t })
-  return curses.newwin(height, width, y_t, x_t)
+  local win = curses.newwin(height, width, y_t, x_t)
+  win:nodelay(true)
+
+  return win
 end
 
 local function cleanup_screen()
@@ -90,7 +93,7 @@ end
 
 -- game rendering
 
-local render_interval = 0.5 -- [s]
+local render_interval = 0.01 -- [s]
 
 local function time_since_start(frame_i)
   return render_interval * frame_i
