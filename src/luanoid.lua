@@ -102,7 +102,8 @@ local function make_window(scr, height, width, y0, x0)
   local y_t, x_t = trans_coords(y0, x0, lua2curses_trans)
 
   log('make_window', { height=height, width=width, y_t=y_t, x_t=x_t })
-  local win = curses.newwin(height, width, y_t, x_t)
+  -- accomodates for the 1-char wide border
+  local win = curses.newwin(height + 2, width + 2, y_t, x_t)
   win:nodelay(true)
 
   return win
@@ -318,10 +319,15 @@ local function run()
 
     -- ball collisions
     if luanoid.point_rect_collision(
-      snap_pos(ball_pos_candidate),
+      ball_pos_candidate,
       board_rect(world_opts)
     ) then
-      log("ball-board collision detected", { ball_pos_candidate=ball_pos_candidate, ball_velocity=world.ball_velocity })
+      log("ball-board collision detected", {
+            pos_candidate=ball_pos_candidate,
+            pos_snapped=snap_pos(ball_pos_candidate),
+            velocity=world.ball_velocity,
+            board_size=world_opts.board_size
+      })
       world.ball_velocity = { x=world.ball_velocity.x * -1, y=world.ball_velocity.y * -1 }
     else
       world.ball_pos_frac = ball_pos_candidate
