@@ -3,6 +3,8 @@ local sleep = require "sleep"
 
 local luanoid = {}
 
+-- helpers
+
 local function current_date_time()
   return os.date("!%Y-%m-%dT%TZ")
 end
@@ -11,20 +13,58 @@ debug_file = nil
 
 local function log(msg, details)
   if debug_file == nil then
-    debug_file = io.open("debug.log", "a")
+    debug_file = io.open("debug.log", "w")
     debug_file:write('\n=== new session ===\n')
   end
 
   log_text = "[" .. current_date_time() .. "] " .. msg .. "\n"
 
-  for key, val in pairs(details or {}) do
-    log_text = log_text .. '"' .. key .. '" = ' .. val .. "\n"
-  end
+  log_text = log_text .. table_to_str(details or {}) .. "\n"
 
   debug_file:write(log_text .. "\n")
   debug_file:flush()
 end
 
+function _deep_copy_table(o, tables)
+
+  if type(o) ~= 'table' then
+    return o
+  end
+
+  if tables[o] ~= nil then
+    return tables[o]
+  end
+
+  local new_o = {}
+  tables[o] = new_o
+
+  for k, v in next, o, nil do
+    local new_k = _deep_copy_table(k, tables)
+    local new_v = _deep_copy_table(v, tables)
+    new_o[new_k] = new_v
+  end
+
+  return new_o
+end
+
+function deep_copy_table(o)
+  return _deep_copy_table(o, {})
+end
+
+function table_to_str(t)
+  if type(t) == "table" then
+    local str = "{ "
+    for k, v in pairs(t) do
+      str = str .. k .. "=" .. table_to_str(v) .. ", "
+    end
+    str = str .. " }"
+    return str
+
+  else
+    return "" .. t
+
+  end
+end
 
 -- translations
 
