@@ -123,7 +123,12 @@ local function clear(screen)
 end
 
 local function read_char(screen)
-  return string.char(screen:getch())
+  local char = screen:getch()
+  if char == curses.err then
+    return nil
+  else
+    return string.char(char)
+  end
 end
 
 local function move_cursor(screen, y, x, trans)
@@ -199,6 +204,13 @@ local function paddle_rect(world, world_opts)
   return { x=world.paddle_left_x, y=world_opts.paddle_y, width=world_opts.paddle_len, height=1 }
 end
 
+local function board_rect(world_opts)
+  return { x=1, y=1, width=world_opts.board_size.width, height=world_opts.board_size.height }
+end
+
+local function paddle_board_collision(world, world_opts)
+  return world.paddle_left_x <= 1 or world_opts.board_size.width <= world.paddle_left_x + world_opts.paddle_len
+end
 
 local function render_world(scr, world, opts, trans)
   -- bricks
@@ -246,7 +258,7 @@ local function starter_world()
     },
     ball_pos_frac={ x=5.0, y=4.0 },
     ball_velocity={ x=1, y=1 },
-    paddle_left_x=3,
+    paddle_left_x=5,
   }
 end
 
@@ -257,7 +269,7 @@ local function make_world_opts()
     paddle_len=6,
     paddle_y=10,
     paddle_char="=",
-    board_size={ height=12, width=20 }
+    board_size={ height=14, width=30 }
   }
 end
 
@@ -283,16 +295,23 @@ local function run()
     game_win:border()
 
     -- paddle movement
+    local world_candidate = deep_copy_table(world)
     if input_char == 'a' then
-      world.paddle_left_x = world.paddle_left_x - 1
+      world_candidate.paddle_left_x = world.paddle_left_x - 1
     elseif input_char == 'd' then
-      world.paddle_left_x = world.paddle_left_x + 1
+      world_candidate.paddle_left_x = world.paddle_left_x + 1
+    end
+
+    if paddle_board_collision(world_candidate, world_opts) then
+      log("paddle-board collision detected")
+    else
+      world = world_candidate
     end
 
     -- ball collisions
     if luanoid.point_rect_collision(
       snap_pos(world.ball_pos_frac),
-      { x=1, y=1, width=world_opts.board_size.width, height=world_opts.board_size.height }
+      board_rect(world_opts)
     ) then
       world.ball_velocity = { x=world.ball_velocity.x * -1, y=world.ball_velocity.y * -1 }
     end
@@ -312,7 +331,9 @@ local function run()
 
     sleep(1000 * render_interval)
     input_char = read_char(game_win)
-    log("read char", { input_char=input_char })
+    if input_char ~= curses.err then
+      log("read char", { input_char=input_char })
+    end
 
     frame_i = frame_i + 1
   end
