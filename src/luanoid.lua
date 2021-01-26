@@ -113,7 +113,7 @@ end
 
 -- collisions
 
-function luanoid.is_pos_adjacent_to_rect(pos, rect)
+function luanoid.point_rect_collision(pos, rect)
   rect_p2 = { x=rect.x + rect.width, y=rect.y + rect.height }
 
   diff_x1 = rect.x - pos.x
@@ -140,6 +140,10 @@ end
 
 local function brick_placeholder(length)
   return string.rep(" ", length)
+end
+
+local function paddle_rect(world, world_opts)
+  return { x=world.paddle_left_x, y=world_opts.paddle_y, width=world_opts.paddle_len, height=1 }
 end
 
 
@@ -170,13 +174,14 @@ local function render_world(scr, world, opts, trans)
 
 
   -- paddle
-  paddle_y, paddle_x = trans_coords(opts.board_size.height - 1, world.paddle_left_x)
+  local paddle_r = paddle_rect(world, opts)
   print_text(
     scr,
-    opts.board_size.height - 2,
-    world.paddle_left_x - 1,
-    paddle(opts.paddle_char, opts.paddle_len)
+    paddle_r.y,
+    paddle_r.x,
+    paddle(opts.paddle_char, paddle_r.width)
   )
+
 end
 
 local function starter_world()
@@ -197,6 +202,7 @@ local function make_world_opts()
     brick_len=4,
     ball_char="o",
     paddle_len=6,
+    paddle_y=10,
     paddle_char="=",
     board_size={ height=12, width=20 }
   }
@@ -231,7 +237,7 @@ local function run()
     end
 
     -- ball collisions
-    if luanoid.is_pos_adjacent_to_rect(
+    if luanoid.point_rect_collision(
       snap_pos(world.ball_pos_frac),
       { x=1, y=1, width=world_opts.board_size.width, height=world_opts.board_size.height }
     ) then
