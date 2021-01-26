@@ -164,14 +164,14 @@ end
 -- collisions
 
 function luanoid.point_rect_collision(pos, rect)
-  rect_p2 = { x=rect.x + rect.width, y=rect.y + rect.height }
+  rect_p2 = { x=rect.x + rect.width - 1, y=rect.y + rect.height - 1}
 
   diff_x1 = rect.x - pos.x
   diff_y1 = rect.y - pos.y
   diff_x2 = rect_p2.x - pos.x
   diff_y2 = rect_p2.y - pos.y
 
-  return math.min(math.abs(diff_x1), math.abs(diff_x2)) <= 1 or math.min(math.abs(diff_y1), math.abs(diff_y2)) <= 1
+  return math.min(math.abs(diff_x1), math.abs(diff_x2)) < 1 or math.min(math.abs(diff_y1), math.abs(diff_y2)) < 1
 end
 
 function luanoid.rect_rect_collision(r1, r2)
@@ -210,7 +210,7 @@ local function paddle_rect(world, world_opts)
 end
 
 local function board_rect(world_opts)
-  return { x=1, y=1, width=world_opts.board_size.width, height=world_opts.board_size.height }
+  return { x=0, y=0, width=world_opts.board_size.width + 1, height=world_opts.board_size.height + 2 }
 end
 
 local function paddle_board_collision(world, world_opts)
@@ -262,7 +262,7 @@ local function starter_world()
       {1, 2, 3, 4},
     },
     ball_pos_frac={ x=3.0, y=10.0 },
-    ball_velocity={ x=1, y=1 },
+    ball_velocity={ x=2, y=2 },
     paddle_left_x=5,
   }
 end
