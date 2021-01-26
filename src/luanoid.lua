@@ -66,6 +66,10 @@ function table_to_str(t)
   end
 end
 
+function round(num)
+  return math.floor(num + 0.5)
+end
+
 -- translations
 
 local function trans_coords(y, x, src2dst_trans)
@@ -146,7 +150,7 @@ local function time_since_start(frame_i)
 end
 
 local function snap_pos(pos)
-  return { x=math.floor(pos.x), y=math.floor(pos.y) }
+  return { x=round(pos.x), y=round(pos.y) }
 end
 
 local function advance_pos(pos, velocity, time_delta)
@@ -256,7 +260,7 @@ local function starter_world()
       {1,    3,  },
       {1, 2, 3, 4},
     },
-    ball_pos_frac={ x=5.0, y=4.0 },
+    ball_pos_frac={ x=3.0, y=10.0 },
     ball_velocity={ x=1, y=1 },
     paddle_left_x=5,
   }
@@ -308,16 +312,21 @@ local function run()
       world = world_candidate
     end
 
-    -- ball collisions
-    if luanoid.point_rect_collision(
-      snap_pos(world.ball_pos_frac),
-      board_rect(world_opts)
-    ) then
-      world.ball_velocity = { x=world.ball_velocity.x * -1, y=world.ball_velocity.y * -1 }
-    end
 
     -- ball movement
-    world.ball_pos_frac = advance_pos(world.ball_pos_frac, world.ball_velocity, render_interval)
+    ball_pos_candidate = advance_pos(world.ball_pos_frac, world.ball_velocity, render_interval)
+
+    -- ball collisions
+    if luanoid.point_rect_collision(
+      snap_pos(ball_pos_candidate),
+      board_rect(world_opts)
+    ) then
+      log("ball-board collision detected", { ball_pos_candidate=ball_pos_candidate, ball_velocity=world.ball_velocity })
+      world.ball_velocity = { x=world.ball_velocity.x * -1, y=world.ball_velocity.y * -1 }
+    else
+      world.ball_pos_frac = ball_pos_candidate
+    end
+
 
     render_world(
         game_win,
