@@ -30,6 +30,15 @@ TestPointRectCollision = {}
     )
   end
 
+  function TestPointRectCollision:test_inside_almost_bottom_edge()
+    luaunit.assertFalse(
+        luanoid.point_rect_collision(
+        { x=5, y=9 },
+        { x=1, y=1, width=10, height=10 }
+        )
+    )
+  end
+
 TestRectRectCollision = {}
   function TestRectRectCollision:test_disjoint()
     luaunit.assertFalse(

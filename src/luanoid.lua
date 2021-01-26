@@ -210,11 +210,14 @@ local function paddle_rect(world, world_opts)
 end
 
 local function board_rect(world_opts)
-  return { x=0, y=0, width=world_opts.board_size.width + 1, height=world_opts.board_size.height + 2 }
+  return { x=0, y=0, width=world_opts.board_size.width + 1, height=world_opts.board_size.height + 1 }
 end
 
 local function paddle_board_collision(world, world_opts)
-  return world.paddle_left_x <= 1 or world_opts.board_size.width + 2 < world.paddle_left_x + world_opts.paddle_len
+  return world.paddle_left_x <= 0 or world_opts.board_size.width < world.paddle_left_x + world_opts.paddle_len - 1
+end
+
+local function ball_paddle_collision(world, world_opts)
 end
 
 local function render_world(scr, world, opts, trans)
@@ -249,7 +252,8 @@ local function render_world(scr, world, opts, trans)
     scr,
     paddle_r.y,
     paddle_r.x,
-    paddle(opts.paddle_char, paddle_r.width)
+    paddle(opts.paddle_char, paddle_r.width),
+    trans
   )
 
 end
@@ -308,7 +312,7 @@ local function run()
     end
 
     if paddle_board_collision(world_candidate, world_opts) then
-      log("paddle-board collision detected")
+      log("paddle-board collision detected", { left_x=world_candidate.paddle_left_x })
     else
       world = world_candidate
     end
@@ -323,8 +327,8 @@ local function run()
       board_rect(world_opts)
     ) then
       log("ball-board collision detected", {
+            pos=world.ball_pos_frac,
             pos_candidate=ball_pos_candidate,
-            pos_snapped=snap_pos(ball_pos_candidate),
             velocity=world.ball_velocity,
             board_size=world_opts.board_size
       })
