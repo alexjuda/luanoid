@@ -214,7 +214,7 @@ local function board_rect(world_opts)
 end
 
 local function paddle_board_collision(world, world_opts)
-  return world.paddle_left_x <= 1 or world_opts.board_size.width <= world.paddle_left_x + world_opts.paddle_len
+  return world.paddle_left_x <= 1 or world_opts.board_size.width + 2 < world.paddle_left_x + world_opts.paddle_len
 end
 
 local function render_world(scr, world, opts, trans)
@@ -340,9 +340,10 @@ local function run()
         world_opts,
         win_border_trans
     )
-    redraw(game_win)
 
-    move_cursor(game_win, 0, 0)
+    move_cursor(game_win, 1, 1)
+
+    redraw(game_win)
 
     sleep(1000 * render_interval)
     input_char = read_char(game_win)
