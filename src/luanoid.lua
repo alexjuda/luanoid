@@ -121,10 +121,23 @@ function luanoid.point_rect_collision(pos, rect)
   diff_x2 = rect_p2.x - pos.x
   diff_y2 = rect_p2.y - pos.y
 
-  log('is_pos', { diff_x1=diff_x1, diff_y1=diff_y1, diff_x2=diff_x2, diff_y2=diff_y2})
-
   return math.min(math.abs(diff_x1), math.abs(diff_x2)) <= 1 or math.min(math.abs(diff_y1), math.abs(diff_y2)) <= 1
 end
+
+function luanoid.rect_rect_collision(r1, r2)
+  -- formula from http://www.jeffreythompson.org/collision-detection/rect-rect.php
+  if (
+    r1.x + r1.width >= r2.x and
+    r1.x <= r2.x + r2.width and
+    r1.y + r1.height >= r2.y and
+    r1.y <= r2.y + r2.height
+  ) then
+    return true
+  else
+    return false
+  end
+end
+
 
 -- render blocks
 
