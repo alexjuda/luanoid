@@ -9,10 +9,16 @@ $ docker run -it --rm --mount type=bind,source="$(pwd)",target="/app/" luanoid-d
 ```
 
 
-Inside docker container:
+Inside the docker container:
 ```
-$ lua5.3 main.lua
+$ lua5.3 src/main.lua
 ```
+
+To run the tests:
+```
+$ tests/test_luanoid.lua
+```
+
 
 ## Misc
 
